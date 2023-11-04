@@ -2,6 +2,38 @@
 const connection = require('../db/connection');
 
 module.exports = {
+
+  async Indexload(request, response) {
+    try {
+      const { filtro } =  request.body;
+
+      let query = connection('table_esfericas').select('*');
+
+      if (filtro && Array.isArray(filtro) && filtro.length > 0) {
+        const results = [];        
+
+        for(let i = 0; i < filtro.length; i ++) {
+          const filtroValor = filtro[i];
+            
+          const result = await query.clone().where('name', '=', filtroValor);
+
+          if (result == (0)) {
+            return response.status(200).json(results);
+          }
+          results.push(result);
+        }
+        return response.status(200).json(results);
+      } else {
+        return response.json({ message: 'Filtro2 está vazio.' });
+      }
+      
+    } catch (error) {
+      console.error(error);
+      return response.status(500).send({
+        error: 'Ocorreu um erro ao consultar os dados.'
+      });
+    }
+  },
   
   async Index(request, response) {
     try {

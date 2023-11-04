@@ -1,4 +1,6 @@
 /* Código é usado para conectar ao banco de dados */
+const generateUniqueId = require('../Utils/generateUniqueId');
+const crypto = require('crypto');
 const connection = require('../db/connection');
 
 module.exports = {
@@ -21,15 +23,17 @@ module.exports = {
   async Create(request, response) {
     try {
       const { username, password } = request.body;
+      const hash = crypto.createHash('md5').update(password).digest('hex');
+      const passwordHash = hash;
+      const id = generateUniqueId();
 
       await connection('users').insert({
+        id,
         username,
-        password,
+        passwordHash,
       });
   
-      return response.status(201).send({
-        message: 'Dados inseridos com sucesso.'
-      });
+      return response.status(201).json({ id });
     } catch (error) {
       console.error(error);
       return response.status(500).send({
